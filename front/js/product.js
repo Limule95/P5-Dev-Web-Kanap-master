@@ -51,9 +51,13 @@ fetch(`http://localhost:3000/api/products/${id}`)
 
 // https://openclassrooms.com/fr/courses/5543061-ecrivez-du-javascript-pour-le-web/5578156-ecoutez-des-evenements
 // target.addEventListener(type, listener [, options]);
+//On observe l'évènement "au click" sur le bouton "ajouter au panier" fait par l'utilisateur -------------
 const button = document.getElementById("addToCart");
 button.addEventListener("click", addToCart);
 
-function addToCart() {
-  console.log("clické");
+function addToCart(e) {
+  let color = document.getElementById("colors").value;
+  let nombre = document.getElementById("quantity").value;
+  let titre = document.getElementById("title");
+  console.log(id, color, nombre, titre.innerHTML);
 }
