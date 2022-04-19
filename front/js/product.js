@@ -59,5 +59,36 @@ function addToCart(e) {
   let color = document.getElementById("colors").value;
   let nombre = document.getElementById("quantity").value;
   let titre = document.getElementById("title");
-  console.log(id, color, nombre, titre.innerHTML);
+  console.log(id, color, nombre);
+
+  //recup panier localstorage =>
+  let recPanier = localStorage.getItem("panier");
+
+  let product = {
+    id: id,
+    color: color,
+    nombre: nombre,
+  };
+
+  let panier = [];
+
+  if (recPanier == null) {
+    panier.push(product);
+  } else {
+    panier = JSON.parse(recPanier);
+    panier.push(product);
+    for (let item of panier) {
+      if (product.nombre >= nombre) {
+        console.log("+11");
+      }
+      console.log(item);
+    }
+  }
+
+  localStorage.setItem("panier", JSON.stringify(panier));
 }
+
+//si il y a déja un kanape avec x couleur et le meme ID dans le panier => alors
+//modifier seulement le nombre de produit
+
+//bouclé mon panier pour voir les produits déja présent
