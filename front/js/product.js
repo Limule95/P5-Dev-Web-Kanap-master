@@ -1,15 +1,19 @@
-const url = new URL(window.location.href); //url de la page enc ours a partir de window
+const url = new URL(window.location.href); //url de la page en cours a partir de window
 const id = url.searchParams.get("id");
 console.log(window.location.href);
 
-// On requête l’API dans le but de récupérer les différentes informations du produit en question.
+//====================================================================================
+
+// Récupération des articles de l'API
 fetch(`http://localhost:3000/api/products/${id}`)
   .then(function (reponse) {
     if (reponse.ok) {
       return reponse.json();
     }
   })
+  // Répartition des données de l'API dans le DOM
   .then(function (produit) {
+    // Insertion de l'image
     //On crée un élément (enfant) img vide en utilisant la méthode createElement()
     const image = document.createElement("img");
     //On définie ses attributs : chemin d'acces, descrption de l'image
@@ -21,18 +25,19 @@ fetch(`http://localhost:3000/api/products/${id}`)
     //autre méthode avec innerHTML =>
     // document.querySelector(".item__img").innerHTML = `<img src="${produit.imageUrl}">`;
 
+    // Modification du titre "h1"
     const title = document.getElementById("title");
     title.innerHTML = produit.name;
-    console.log(title);
 
+    // Modification du prix
     const price = document.querySelector("#price");
     price.innerHTML = produit.price;
-    console.log(price);
 
+    // Modification de la description
     const description = document.querySelector("#description");
     description.innerHTML = produit.description;
-    console.log(description);
 
+    // Insertion des options de couleurs
     //pour "les couleurs" de "l'objet produit + sa donnée #le tableau qui contient les couleurs" = objet.donnée {objet.[couleur]}
     for (let produitCouleur of produit.colors) {
       //On crée un élément (enfant) "option" vide en utilisant la méthode "createElement()"
@@ -40,7 +45,6 @@ fetch(`http://localhost:3000/api/products/${id}`)
       //On définie les attributs :
       couleur.value = produitCouleur;
       couleur.innerHTML = produitCouleur;
-      console.log(couleur);
       //On l'insére (au parent) dans le document. ex: Div parent => enfant.element
       document.querySelector("#colors").appendChild(couleur);
     }
@@ -49,46 +53,77 @@ fetch(`http://localhost:3000/api/products/${id}`)
     // Une erreur est survenue
   });
 
-// https://openclassrooms.com/fr/courses/5543061-ecrivez-du-javascript-pour-le-web/5578156-ecoutez-des-evenements
-// target.addEventListener(type, listener [, options]);
+//====================================================================================
+
+// Panier
 //On observe l'évènement "au click" sur le bouton "ajouter au panier" fait par l'utilisateur -------------
 const button = document.getElementById("addToCart");
 button.addEventListener("click", addToCart);
 
+// On crée une fonction "addToCart" qui va ajouter un produit dans le panier
 function addToCart(e) {
-  let color = document.getElementById("colors").value;
-  let nombre = document.getElementById("quantity").value;
-  let titre = document.getElementById("title");
-  console.log(id, color, nombre);
+  //Initialisation du local storage
+  //Récupérer l'article du stockage pour ajouter un nouvel article
+  let articleLocalStorage = JSON.parse(localStorage.getItem("article"));
+  // 2e méthode :
+  // var recupArticle = localStorage.getItem("article");
+  // var articleStocké = JSON.parse(recupArticle);
 
-  //recup panier localstorage =>
-  let recPanier = localStorage.getItem("panier");
+  // on récupère la couleur choisie
+  const colorValue = document.querySelector("#colors");
+  let color = colorValue.value;
+  // 2 eme méthode: const colorValue = document.querySelector("#colors").value;
 
-  let product = {
+  // On récupère la quantitée voulue
+  const quantityValue = document.querySelector("#quantity");
+  let nombreValue = quantityValue.value;
+  // 2 eme méthode: const colorValue = document.querySelector("#quantity").value;
+
+  // Options de l'article à ajouter au panier
+  let article = {
     id: id,
     color: color,
-    nombre: nombre,
+    nombre: Number(nombreValue),
   };
 
-  let panier = [];
+  //Importation dans le local storage
+  //Si le panier est vide, alors =>
+  if (articleLocalStorage == null) {
+    // On crée un "array" panier
+    articleLocalStorage = [];
+    // On "push" ajoute l'article dans "l'array" panier
+    articleLocalStorage.push(article);
+    // On ajoute dans le localStorage un "article" qu'on va pouvoir recupérer (en charactere "string") avec "getItem" et stocker "JSON.pars" qui est un "array" qui contient un "objet" contenant des données sur l'article
+    localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+    // Utilisation de ".table" pour afficher un tableau dans la console
+    console.table(articleLocalStorage);
 
-  if (recPanier == null) {
-    panier.push(product);
+    //Sinon => Si le panier comporte déjà au moins 1 article
   } else {
-    panier = JSON.parse(recPanier);
-    panier.push(product);
-    for (let item of panier) {
-      if (product.nombre >= nombre) {
-        console.log("+11");
-      }
-      console.log(item);
+    // On utilise ".find" pour trouver un élèment dans "l"array" panier
+    const articleFind = articleLocalStorage.find(
+      //(el) = élèment ; On compare les élèments pour s'avoir si ceux présent dans le panier sont les mêmes
+      (el) => el.id === id && el.color === color
+    );
+    //Si le produit commandé est déjà dans le panier, alors =>
+    if (articleFind) {
+      // On utilise "parseInt" pour analyser la valeur qu'on souhaite modifier en comparant la valeur avec celles récuperer dans le tableau avec ".find"
+      let nouvelleValue =
+        parseInt(article.nombre) + parseInt(articleFind.nombre);
+      //On déclare la nouvelle valeur obtenue dans "articleFind.nombre"
+      articleFind.nombre = nouvelleValue;
+      localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+      console.table(articleLocalStorage);
+
+      //Si le produit commandé n'est pas dans le panier, alors =>
+    } else {
+      articleLocalStorage.push(article);
+      localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+      console.table(articleLocalStorage);
     }
   }
-
-  localStorage.setItem("panier", JSON.stringify(panier));
 }
 
-//si il y a déja un kanape avec x couleur et le meme ID dans le panier => alors
-//modifier seulement le nombre de produit
-
-//bouclé mon panier pour voir les produits déja présent
+//si il y a déja un kanape avec x id et x couleur dans le panier => alors
+//modifier seulement le nombre de article  => sinon
+//rajouter un article
