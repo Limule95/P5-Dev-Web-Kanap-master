@@ -62,16 +62,14 @@ button.addEventListener("click", addToCart);
 
 // On crée une fonction "addToCart" qui va ajouter un produit dans le panier
 function addToCart(e) {
-  //Initialisation du local storage
-  //Récupérer l'article du stockage pour ajouter un nouvel article
-  let articleLocalStorage = JSON.parse(localStorage.getItem("article"));
-  // 2e méthode :
-  // var recupArticle = localStorage.getItem("article");
-  // var articleStocké = JSON.parse(recupArticle);
-
   // on récupère la couleur choisie
   const colorValue = document.querySelector("#colors");
   let color = colorValue.value;
+  if (color === "") {
+    alert("Aucune couleur choisie, veuillez choisir une couleur!");
+    return false;
+  }
+
   // 2 eme méthode: const colorValue = document.querySelector("#colors").value;
 
   // On récupère la quantitée voulue
@@ -85,6 +83,14 @@ function addToCart(e) {
     color: color,
     nombre: Number(nombreValue),
   };
+
+  //Initialisation du local storage
+  //Récupérer l'article du stockage pour ajouter un nouvel article
+  let articleLocalStorage = JSON.parse(localStorage.getItem("article"));
+
+  // 2e méthode :
+  // var recupArticle = localStorage.getItem("article");
+  // var articleStocké = JSON.parse(recupArticle);
 
   //Importation dans le local storage
   //Si le panier est vide, alors =>
@@ -100,27 +106,51 @@ function addToCart(e) {
 
     //Sinon => Si le panier comporte déjà au moins 1 article
   } else {
-    // On utilise ".find" pour trouver un élèment dans "l"array" panier
-    const articleFind = articleLocalStorage.find(
-      //(el) = élèment ; On compare les élèments pour s'avoir si ceux présent dans le panier sont les mêmes
-      (el) => el.id === id && el.color === color
-    );
-    //Si le produit commandé est déjà dans le panier, alors =>
-    if (articleFind) {
-      // On utilise "parseInt" pour analyser la valeur qu'on souhaite modifier en comparant la valeur avec celles récuperer dans le tableau avec ".find"
-      let nouvelleValue =
-        parseInt(article.nombre) + parseInt(articleFind.nombre);
-      //On déclare la nouvelle valeur obtenue dans "articleFind.nombre"
-      articleFind.nombre = nouvelleValue;
-      localStorage.setItem("article", JSON.stringify(articleLocalStorage));
-      console.table(articleLocalStorage);
+    let find = false;
+    for (let produit of articleLocalStorage) {
+      if (produit.id === article.id && produit.color === article.color) {
+        produit.nombre = article.nombre + produit.nombre;
 
-      //Si le produit commandé n'est pas dans le panier, alors =>
-    } else {
+        // produit.nombre =
+        //   article.nombre + produit.nombre > 100
+        //     ? 100
+        //     : article.nombre + produit.nombre;
+
+        if (produit.nombre > 100) {
+          produit.nombre = 100;
+          alert("Vous ne pouvez pas dépasser 100 articles");
+        }
+        localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+        find = true;
+        console.table(articleLocalStorage);
+      }
+    }
+    if (find === false) {
       articleLocalStorage.push(article);
       localStorage.setItem("article", JSON.stringify(articleLocalStorage));
       console.table(articleLocalStorage);
     }
+    // // On utilise ".find" pour trouver un élèment dans "l"array" panier
+    // const articleFind = articleLocalStorage.find(
+    //   //(el) = élèment ; On compare les élèments pour s'avoir si ceux présent dans le panier sont les mêmes
+    //   (el) => el.id === id && el.color === color
+    // );
+    // //Si le produit commandé est déjà dans le panier, alors =>
+    // if (articleFind) {
+    //   // On utilise "parseInt" pour analyser la valeur qu'on souhaite modifier en comparant la valeur avec celles récuperer dans le tableau avec ".find"
+    //   let nouvelleValue =
+    //     parseInt(article.nombre) + parseInt(articleFind.nombre);
+    //   //On déclare la nouvelle valeur obtenue dans "articleFind.nombre"
+    //   articleFind.nombre = nouvelleValue;
+    //   localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+    //   console.table(articleLocalStorage);
+
+    //   //Si le produit commandé n'est pas dans le panier, alors =>
+    // } else {
+    //   articleLocalStorage.push(article);
+    //   localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+    //   console.table(articleLocalStorage);
+    // }
   }
 }
 
