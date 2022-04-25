@@ -76,7 +76,7 @@ function addToCart(e) {
   const quantityValue = document.querySelector("#quantity");
   let nombreValue = quantityValue.value;
   // 2 eme méthode: const colorValue = document.querySelector("#quantity").value;
-
+  const newImg = document.querySelector(".item__img");
   // Options de l'article à ajouter au panier
   let article = {
     id: id,
