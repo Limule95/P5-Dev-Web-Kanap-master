@@ -55,7 +55,7 @@ fetch(`http://localhost:3000/api/products/${id}`)
 
 //====================================================================================
 
-// Panier
+// Ajout au Panier
 //On observe l'évènement "au click" sur le bouton "ajouter au panier" fait par l'utilisateur -------------
 const button = document.getElementById("addToCart");
 button.addEventListener("click", addToCart);
@@ -76,7 +76,7 @@ function addToCart(e) {
   const quantityValue = document.querySelector("#quantity");
   let nombreValue = quantityValue.value;
   // 2 eme méthode: const colorValue = document.querySelector("#quantity").value;
-  const newImg = document.querySelector(".item__img");
+
   // Options de l'article à ajouter au panier
   let article = {
     id: id,
