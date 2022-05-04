@@ -80,11 +80,12 @@ for (let produit of articleLocalStorage) {
 
         // On insert le prix
         let priceCartItem = document.createElement("p");
+
         // on vise le conteneur
         cartItemContentDescription.appendChild(priceCartItem);
         // On insert les attributs
         let getPriceTotal = getCart.price * produit.nombre;
-        priceCartItem.innerHTML = getPriceTotal + " €";
+        priceCartItem.innerHTML = `<span class="price">${getPriceTotal}</span>€`;
         //On récupère le prix Total de tous les articles
         totalProductsPrice = totalProductsPrice + getPriceTotal;
 
@@ -162,12 +163,27 @@ for (let produit of articleLocalStorage) {
 //On déclare la function "deleteItem"
 function deleteItem(e) {
   let boutonSuprimer = e.target;
-
   let article = boutonSuprimer.closest(".cart__item");
-  article.remove();
+
   console.log(article);
-  let cartItem = document.querySelector(".cart__item");
-  cartItem.dataset.id === "";
-  cartItem.dataset.color === "";
-  console.log(cartItem.dataset.color);
+
+  article.dataset.id === "";
+  article.dataset.color === "";
+  console.log(article.dataset.id);
+  console.log(article.dataset.color);
+  for (let produit of articleLocalStorage) {
+    if (
+      produit.id === article.dataset.id &&
+      produit.color === article.dataset.color
+    ) {
+      //j'ai fais de cette façon pour récupérer le prix apprès la suppréssion par facilité, mais on pourrait aussi faire un fetch.
+      console.log(document.querySelector("article .price").textContent);
+
+      console.log(articleLocalStorage.indexOf(produit));
+      let index = articleLocalStorage.indexOf(produit);
+      articleLocalStorage.splice(index, 1);
+      localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+      article.remove();
+    }
+  }
 }
