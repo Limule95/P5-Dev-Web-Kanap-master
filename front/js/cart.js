@@ -17,12 +17,11 @@ for (let produit of articleLocalStorage) {
     .then(function (getCart) {
       // Si le localStorage est vide
       if (articleLocalStorage === null) {
-        // on vise le conteneur
-        const articleNull = document.querySelector("#cart__items");
+        let artNull = document.createElement("p");
         //On signale a l'utilisateur que le panier est vide
-        const artNull = `<p>Votre panier est vide</p>`;
-        // On insert le méssage avec innerHTML
-        articleNull.innerHTML = artNull;
+        artNull.innerHTML = "Votre panier est vide";
+        // on vise le conteneur et on ajoute le nœud  a la nouvelle div créé
+        document.querySelector("#cart__items").appendChild(artNull);
       } else {
         //Si le localStorage contient des données
         // Insertion d'un article
@@ -164,22 +163,18 @@ for (let produit of articleLocalStorage) {
 function deleteItem(e) {
   let boutonSuprimer = e.target;
   let article = boutonSuprimer.closest(".cart__item");
-
-  console.log(article);
-
   article.dataset.id === "";
   article.dataset.color === "";
-  console.log(article.dataset.id);
-  console.log(article.dataset.color);
+
   for (let produit of articleLocalStorage) {
     if (
       produit.id === article.dataset.id &&
       produit.color === article.dataset.color
     ) {
-      //j'ai fais de cette façon pour récupérer le prix apprès la suppréssion par facilité, mais on pourrait aussi faire un fetch.
-      console.log(document.querySelector("article .price").textContent);
+      // j'ai fais de cette façon pour récupérer le prix apprès la suppréssion par facilité, mais on pourrait aussi faire un fetch.
+      // changePrice = document.querySelector("article .price").textContent;
+      // let productTotalPrice = document.getElementById("totalPrice");
 
-      console.log(articleLocalStorage.indexOf(produit));
       let index = articleLocalStorage.indexOf(produit);
       articleLocalStorage.splice(index, 1);
       localStorage.setItem("article", JSON.stringify(articleLocalStorage));
