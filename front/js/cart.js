@@ -1,13 +1,18 @@
+//Initialisation du local storage qu'on récupère dans la console sous forme de tableau avec " console.table "
 let articleLocalStorage = JSON.parse(localStorage.getItem("article"));
 console.table(articleLocalStorage);
+//Initialisation de la variables " totalProductsPrice" qu'on viendra réutiliser pour afficher le prix total de tous les articles.
 let totalProductsPrice = 0;
+//Initialisation de la variables "totalProductsArticle" qu'on viendra réutiliser pour afficher le la quantité pour chaque article.
 let totalProductsArticle = 0;
 
 //Au chargement de la page :
 for (let produit of articleLocalStorage) {
+  //On récupère l'ID
   const id = produit.id;
   console.log(id);
 
+  //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
   fetch(`http://localhost:3000/api/products/${id}`)
     .then(function (reponse) {
       if (reponse.ok) {
@@ -124,6 +129,7 @@ for (let produit of articleLocalStorage) {
         inputQuantity.setAttribute("name", "inputQuantity");
         // On récupère le total de tous les articles
         totalProductsArticle = totalProductsArticle + produit.nombre;
+        inputQuantity.addEventListener("change", updatePrice);
 
         //Insertion de la div div class="cart__item__content__settings__delete
         let cartItemContentSettingsDelete = document.createElement("div");
@@ -147,9 +153,12 @@ for (let produit of articleLocalStorage) {
     })
     .then(function () {
       //On appelle une deuxième function qui sera utiliser une fois que la première promise est fini d'être lu.
+
+      //On déclarer une variable qui va ciblé l'ID "totalPrice" auquel on va insérer le prix total.
       let productTotalPrice = document.getElementById("totalPrice");
       productTotalPrice.innerHTML = totalProductsPrice;
 
+      //On déclarer une variable qui va ciblé l'ID "totalQuantity" auquel on va insérer la quatité total d'article.
       let productTotalQuantity = document.getElementById("totalQuantity");
       productTotalQuantity.innerHTML = totalProductsArticle;
     })
@@ -158,16 +167,24 @@ for (let produit of articleLocalStorage) {
       // Une erreur est survenue
     });
 }
+
+//-------------------------------------Fonction = suppréssion d'article -------------------------------------------
+
 //Après le chargement de la page :
-//On déclare la function "deleteItem"
+//On déclare la function "deleteItem" pour pouvoir supprimer un article du DOM et du localStorage
 function deleteItem(e) {
+  // On crée une variable "boutonSupprimer" au quel on lui donne comme valeur un "event target" qui va ciblé l'élèment du DOM ou la function est appellé.
   let boutonSuprimer = e.target;
+  // On crée une variable "article" à la quelle on lui donne comme valeur la variable "boutonSupprimer" à qui on va lui attribuer un closet qui va ciblé le parent ".cart__Item" de l'enfant target.
   let article = boutonSuprimer.closest(".cart__item");
+  //Avec article.dataset."", on récupère le data-Id et le data-Color de l'élèment ciblé
   article.dataset.id === "";
   article.dataset.color === "";
 
+  // On boucle de localStorage pour récupèrer l'ID et la couleur pour faire une comparaison.
   for (let produit of articleLocalStorage) {
     if (
+      //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'article dans le Dom
       produit.id === article.dataset.id &&
       produit.color === article.dataset.color
     ) {
@@ -175,10 +192,88 @@ function deleteItem(e) {
       // changePrice = document.querySelector("article .price").textContent;
       // let productTotalPrice = document.getElementById("totalPrice");
 
-      let index = articleLocalStorage.indexOf(produit);
-      articleLocalStorage.splice(index, 1);
+      totalProductsArticle = totalProductsArticle - produit.nombre;
+      // On déclare une varible index à laquelle on lui donne comme valeur le localStorage avec un "indexOf" qui renvoie le premier indice.
+      //Sachant que l'on boucle le localStorage, l'indexOf va chercher l'indice en fonction de l'id et la couleur de l'élèment qu'on cible,
+
+      // Avec la méthode "splice", on va modifie le contenu du tableau en retirant l'élément choisie.
+      articleLocalStorage.splice(boutonSuprimer.index, 1);
+      //avec "localStorage.setItem", on met a jour le localStorage
       localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+      //On supprimer l'article du DOM avec "remove"
       article.remove();
     }
   }
+}
+
+//-------------------------------------Fonction = Changement de quantité d'article -------------------------------------------
+
+//On déclare la function "updatePrice" pour pouvoir modifier le nombre d'article et leurs prix, ainsi que le prix total de tous les articles.
+function updatePrice(e) {
+  // On crée une variable "updateButtun" au quel on lui donne comme valeur un "event target" qui va ciblé l'élèment du DOM ou la function est appellé.
+  let updateButtun = e.target;
+  // On crée une variable "update" à la quelle on lui donne comme valeur la variable "updateButtun" à qui on va lui attribuer un closet qui va ciblé le parent ".cart__Item" de l'enfant target.
+  let update = updateButtun.closest(".cart__item");
+  //Avec update.dataset."", on récupère le data-Id et le data-Color de l'élèment ciblé
+  update.dataset.id === "";
+  update.dataset.color === "";
+  //Avec update.value, on recupère la valeur que l'on viens de modifier avec l'event "target" qui cible la valeur qui change.
+  update.value = e.target.value;
+
+  //On initialise une variable "TotalNombre" qui est à 0.
+  let totalNombre = 0;
+
+  // On boucle de localStorage pour récupèrer l'ID et la couleur pour faire une comparaison.
+  for (let produit of articleLocalStorage) {
+    //On récupère l'ID
+    const id = produit.id;
+
+    if (
+      //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'élèment du DOM qu'on modifie.
+      produit.id === update.dataset.id &&
+      produit.color === update.dataset.color
+    ) {
+      //On stock l'encien prix
+      let oldPrice = update.querySelector(".price").textContent;
+      //Avec "produit.nombre" on va récupèrer la valeur de "update.value" qui avec la fonction "parseInt", analyse la chaîne de caractère fournie en argument et renvoie un entier.
+      produit.nombre = parseInt(update.value);
+      //On récupère "totalProductsArticle" au quel on lui attribut la quantité modifier de article avec "produit.nombre"
+      totalProductsArticle = produit.nombre;
+      //avec "localStorage.setItem", on met a jour le localStorage
+      localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+
+      //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
+      fetch(`http://localhost:3000/api/products/${id}`)
+        .then(function (reponse) {
+          if (reponse.ok) {
+            return reponse.json();
+          }
+        })
+        .then(function (getArticle) {
+          //On crée une variable "getPriceTotal"  a laquelle on lui attribut le prix de article x la quantité d'article qu'on à modifier
+          let getPriceTotal = getArticle.price * totalProductsArticle;
+          //On crée une variable "PriceTotal" ou l'on va selectionner ".price"
+          let PriceTotal = update.querySelector(".price");
+          //On insert la valeur de "getPriceTotal" dans le DOM
+          PriceTotal.innerHTML = getPriceTotal;
+
+          //on calcule la différence entre le nouveau prix et l'encien prix ex : 10k - 5k Si le resultat est positif, on rajoute 5k sinon ( 5k - 10k = -5 )on ajoute -5k ( qui est équivalant a retirer 5k)
+          let difference = getPriceTotal - parseInt(oldPrice);
+          console.log(totalProductsPrice);
+          totalProductsPrice = totalProductsPrice + difference;
+          let productTotalPrice = document.getElementById("totalPrice");
+          productTotalPrice.innerHTML = totalProductsPrice;
+        })
+
+        .catch(function (erreur) {
+          // Une erreur est survenue
+        });
+    }
+
+    totalNombre = totalNombre + produit.nombre;
+  }
+
+  //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré.
+  let totalQuantity = document.getElementById("totalQuantity");
+  totalQuantity.innerHTML = totalNombre;
 }

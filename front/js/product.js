@@ -153,7 +153,3 @@ function addToCart(e) {
     // }
   }
 }
-
-//si il y a déja un kanape avec x id et x couleur dans le panier => alors
-//modifier seulement le nombre de article  => sinon
-//rajouter un article
