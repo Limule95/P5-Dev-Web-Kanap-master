@@ -1,6 +1,5 @@
 const url = new URL(window.location.href); //url de la page en cours a partir de window
 const id = url.searchParams.get("id");
-console.log(window.location.href);
 
 //====================================================================================
 
@@ -130,26 +129,5 @@ function addToCart(e) {
       localStorage.setItem("article", JSON.stringify(articleLocalStorage));
       console.table(articleLocalStorage);
     }
-    // // On utilise ".find" pour trouver un élèment dans "l"array" panier
-    // const articleFind = articleLocalStorage.find(
-    //   //(el) = élèment ; On compare les élèments pour s'avoir si ceux présent dans le panier sont les mêmes
-    //   (el) => el.id === id && el.color === color
-    // );
-    // //Si le produit commandé est déjà dans le panier, alors =>
-    // if (articleFind) {
-    //   // On utilise "parseInt" pour analyser la valeur qu'on souhaite modifier en comparant la valeur avec celles récuperer dans le tableau avec ".find"
-    //   let nouvelleValue =
-    //     parseInt(article.nombre) + parseInt(articleFind.nombre);
-    //   //On déclare la nouvelle valeur obtenue dans "articleFind.nombre"
-    //   articleFind.nombre = nouvelleValue;
-    //   localStorage.setItem("article", JSON.stringify(articleLocalStorage));
-    //   console.table(articleLocalStorage);
-
-    //   //Si le produit commandé n'est pas dans le panier, alors =>
-    // } else {
-    //   articleLocalStorage.push(article);
-    //   localStorage.setItem("article", JSON.stringify(articleLocalStorage));
-    //   console.table(articleLocalStorage);
-    // }
   }
 }

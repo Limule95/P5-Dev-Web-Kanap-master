@@ -10,7 +10,6 @@ let totalProductsArticle = 0;
 for (let produit of articleLocalStorage) {
   //On récupère l'ID
   const id = produit.id;
-  console.log(id);
 
   //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
   fetch(`http://localhost:3000/api/products/${id}`)
@@ -129,6 +128,7 @@ for (let produit of articleLocalStorage) {
         inputQuantity.setAttribute("name", "inputQuantity");
         // On récupère le total de tous les articles
         totalProductsArticle = totalProductsArticle + produit.nombre;
+        // On insert un addEventLister au "change" sur le bouton "inputQuantity"
         inputQuantity.addEventListener("change", updatePrice);
 
         //Insertion de la div div class="cart__item__content__settings__delete
@@ -147,7 +147,7 @@ for (let produit of articleLocalStorage) {
         cartItemContentSettingsDelete.appendChild(deleteCartitem);
         // On insert les attributs
         deleteCartitem.innerHTML = "Supprimer";
-        // On insert un addEventLister au "click" sur le bouton supprimer que l'on crée
+        // On insert un addEventLister au "click" sur le bouton supprimer
         deleteCartitem.addEventListener("click", deleteItem);
       }
     })
@@ -206,7 +206,7 @@ function deleteItem(e) {
   }
 }
 
-//-------------------------------------Fonction = Changement de quantité d'article -------------------------------------------
+//-------------------------------------Fonction = Changement de quantité d'article et modification des prix-------------------------------------------
 
 //On déclare la function "updatePrice" pour pouvoir modifier le nombre d'article et leurs prix, ainsi que le prix total de tous les articles.
 function updatePrice(e) {
@@ -259,8 +259,8 @@ function updatePrice(e) {
 
           //on calcule la différence entre le nouveau prix et l'encien prix ex : 10k - 5k Si le resultat est positif, on rajoute 5k sinon ( 5k - 10k = -5 )on ajoute -5k ( qui est équivalant a retirer 5k)
           let difference = getPriceTotal - parseInt(oldPrice);
-          console.log(totalProductsPrice);
           totalProductsPrice = totalProductsPrice + difference;
+          //On insert dans le DOM à "totalPrice" la différence de prix que l'on a récupèré dans la variable "totalProductsPrice".
           let productTotalPrice = document.getElementById("totalPrice");
           productTotalPrice.innerHTML = totalProductsPrice;
         })
@@ -269,11 +269,113 @@ function updatePrice(e) {
           // Une erreur est survenue
         });
     }
-
+    //On ajoute à "totalNombre" le nombre de d'article que l'utilisateur ajoute ou modifie.
     totalNombre = totalNombre + produit.nombre;
   }
 
-  //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré.
+  //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré dans la variable "totalNombre".
   let totalQuantity = document.getElementById("totalQuantity");
   totalQuantity.innerHTML = totalNombre;
+}
+
+//----------------------------------------Validation des données saisie----------------------------------------------------
+//On cible le formulaire
+let form = document.querySelector(".cart__order__form");
+//Ecouter la modification de l'email
+form.email.addEventListener("change", function () {
+  validEmail(this);
+});
+const validEmail = function (inputEmail) {
+  //-----Création de l'expression régulière "RegExp" pour la validation d'email-----
+  let emailRegExp = new RegExp(
+    "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,3}$",
+    "g"
+    //--------Premier paramètre du RegExp----------
+    // ^ = début du texte
+    // [a-zA-Z0-9.-_] = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables au début de l'email
+    // + = Possibilité d'écrire une ou plusieurs fois des caractères
+    // [@] = Définie le caractère possible et {1} = le nombre de fois qu'il est possible de l'écrire.
+    // [a-zA-Z0-9.-_]+ = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables après "@".
+    // [.] = Définie le caractère possible et {1} = le nombre de fois qu'il est possible de l'écrire.
+    // [a-z]{2,3} = ensemble de caractères "minuscule" utilisables pour définir l'extension de l'email
+    // $ = Désigne la fin de mon expression régulière
+    //--------Deuxième paramètre du RegExp----------
+    // Le marqueur "g" = "global". Définie la façon de lire le RegExp
+  );
+  let testEmail = emailRegExp.test(inputEmail.value);
+  // let emailError = inputEmail.nextElementSibling;
+  let error = document.getElementById("emailErrorMsg");
+  if (testEmail) {
+    error.innerHTML = "L'email est valide";
+  } else {
+    error.innerHTML = "L'email n'est pas valide";
+  }
+};
+
+//----------------------------------------récupèration des données saisie----------------------------------------------------
+// Sélectionner l'élément input et récupérer sa valeur
+let firstName = document.getElementById("firstName");
+firstName.addEventListener("change", getValue);
+let lastName = document.getElementById("lastName");
+lastName.addEventListener("change", getValue);
+let address = document.getElementById("address");
+address.addEventListener("change", getValue);
+let city = document.getElementById("city");
+city.addEventListener("change", getValue);
+let email = document.getElementById("email");
+email.addEventListener("change", getValue);
+//On crée un objet "contact"
+let contact = {};
+function getValue(e) {
+  //Avec la function "getValue"
+  //On envoie les données inscrites par l'utilisateur dans les formulaire dans l'objet "contact".
+  contact = {
+    firstName: firstName.value,
+    lastName: lastName.value,
+    address: address.value,
+    city: city.value,
+    email: email.value,
+  };
+}
+//----------------------------------------Envoie de données à l'API----------------------------------------------------
+
+//On cible le bouton commander
+let commander = document.getElementById("order");
+//A l'evenement "Click" sur commander
+commander.addEventListener("click", postCommand);
+//On lance une function "postCommand" pour envoyer les données à l'API
+function postCommand(e) {
+  e.preventDefault();
+  //On crée un tableau "product"
+  let products = [];
+  //On récupère les "ID" des produits du panier.
+  for (let produits of articleLocalStorage) {
+    let id = produits.id;
+    products.push(id);
+  }
+  // Requette fetch pour utiliser la méthode POST, envoyer les données utilisateurs, récupérer le bon de commande et envoyer l'utilisateur sur la page confirmation.
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    body: JSON.stringify({
+      contact,
+      products,
+    }),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  })
+    .then(function (reponse) {
+      if (reponse.ok) {
+        return reponse.json();
+      }
+    })
+    .then(function (reponse) {
+      const orderId = reponse.orderId;
+      console.log(orderId);
+      location.href = `./confirmation.html?commande=${orderId}`;
+    })
+    .catch(function (erreur) {
+      // Une erreur est survenue
+    });
 }
