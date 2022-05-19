@@ -49,7 +49,7 @@ fetch(`http://localhost:3000/api/products/${id}`)
     }
   })
   .catch(function (erreur) {
-    // Une erreur est survenue
+    alert("Une erreur est survenue" + erreur);
   });
 
 //====================================================================================
@@ -117,7 +117,7 @@ function addToCart(e) {
 
         if (produit.nombre > 100) {
           produit.nombre = 100;
-          alert("Vous ne pouvez pas dépasser 100 articles");
+          alert("il y à déja 100 articles dans votre panier");
         }
         localStorage.setItem("article", JSON.stringify(articleLocalStorage));
         find = true;

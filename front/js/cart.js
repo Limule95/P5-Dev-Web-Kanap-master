@@ -6,11 +6,10 @@ let totalProductsPrice = 0;
 //Initialisation de la variables "totalProductsArticle" qu'on viendra réutiliser pour afficher le la quantité pour chaque article.
 let totalProductsArticle = 0;
 
-//Au chargement de la page :
+//****************************Au chargement de la page****************************
 for (let produit of articleLocalStorage) {
   //On récupère l'ID
   const id = produit.id;
-
   //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
   fetch(`http://localhost:3000/api/products/${id}`)
     .then(function (reponse) {
@@ -162,13 +161,12 @@ for (let produit of articleLocalStorage) {
       let productTotalQuantity = document.getElementById("totalQuantity");
       productTotalQuantity.innerHTML = totalProductsArticle;
     })
-
     .catch(function (erreur) {
-      // Une erreur est survenue
+      alert("Une erreur est survenue" + erreur);
     });
 }
 
-//-------------------------------------Fonction = suppréssion d'article -------------------------------------------
+//****************************Fonction = suppréssion d'article****************************
 
 //Après le chargement de la page :
 //On déclare la function "deleteItem" pour pouvoir supprimer un article du DOM et du localStorage
@@ -206,7 +204,7 @@ function deleteItem(e) {
   }
 }
 
-//-------------------------------------Fonction = Changement de quantité d'article et modification des prix-------------------------------------------
+//****************************Fonction = Changement de quantité d'article et modification des prix*********************************
 
 //On déclare la function "updatePrice" pour pouvoir modifier le nombre d'article et leurs prix, ainsi que le prix total de tous les articles.
 function updatePrice(e) {
@@ -227,7 +225,6 @@ function updatePrice(e) {
   for (let produit of articleLocalStorage) {
     //On récupère l'ID
     const id = produit.id;
-
     if (
       //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'élèment du DOM qu'on modifie.
       produit.id === update.dataset.id &&
@@ -264,80 +261,57 @@ function updatePrice(e) {
           let productTotalPrice = document.getElementById("totalPrice");
           productTotalPrice.innerHTML = totalProductsPrice;
         })
-
         .catch(function (erreur) {
-          // Une erreur est survenue
+          alert("Une erreur est survenue" + erreur);
         });
     }
     //On ajoute à "totalNombre" le nombre de d'article que l'utilisateur ajoute ou modifie.
     totalNombre = totalNombre + produit.nombre;
   }
-
   //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré dans la variable "totalNombre".
   let totalQuantity = document.getElementById("totalQuantity");
   totalQuantity.innerHTML = totalNombre;
 }
 
-//----------------------------------------Validation des données saisie----------------------------------------------------
-//On cible le formulaire
-let form = document.querySelector(".cart__order__form");
-//Ecouter la modification de l'email
-form.email.addEventListener("change", function () {
-  validEmail(this);
-});
-const validEmail = function (inputEmail) {
-  //-----Création de l'expression régulière "RegExp" pour la validation d'email-----
-  let emailRegExp = new RegExp(
-    "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,3}$",
-    "g"
-    //--------Premier paramètre du RegExp----------
-    // ^ = début du texte
-    // [a-zA-Z0-9.-_] = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables au début de l'email
-    // + = Possibilité d'écrire une ou plusieurs fois des caractères
-    // [@] = Définie le caractère possible et {1} = le nombre de fois qu'il est possible de l'écrire.
-    // [a-zA-Z0-9.-_]+ = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables après "@".
-    // [.] = Définie le caractère possible et {1} = le nombre de fois qu'il est possible de l'écrire.
-    // [a-z]{2,3} = ensemble de caractères "minuscule" utilisables pour définir l'extension de l'email
-    // $ = Désigne la fin de mon expression régulière
-    //--------Deuxième paramètre du RegExp----------
-    // Le marqueur "g" = "global". Définie la façon de lire le RegExp
-  );
-  let testEmail = emailRegExp.test(inputEmail.value);
-  // let emailError = inputEmail.nextElementSibling;
-  let error = document.getElementById("emailErrorMsg");
-  if (testEmail) {
-    error.innerHTML = "L'email est valide";
-  } else {
-    error.innerHTML = "L'email n'est pas valide";
-  }
-};
+//****************************Validation des données saisie****************************
+//---------------Création des expressions régulières "Regexp"---------------
+//---------------Création de "RegExp" pour la validation de FirstName et LastName---------------
+let textRegExp = new RegExp(
+  "^[a-zA-Z -,]{2,}$"
+  //--------Premier paramètre du RegExp----------
+  // ^ = début du texte
+  // [a-zA-Z -,] = ensemble de caractères "minuscule" "MAJUSCULE" "caractère spéciaux "espace" (, -)"  utilisables
+  // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
+  // $ = Désigne la fin de mon expression régulière
+);
+//---------------Création de "RegExp" pour la validation d'adresse---------------
+let adresseRegExp = new RegExp(
+  "^[a-zA-Z0-9 -,]{2,}$"
+  //--------Premier paramètre du RegExp----------
+  // ^ = début du texte
+  // [a-zA-Z0-9 -,] = ensemble de caractères "minuscule" "MAJUSCULE" "caractère spéciaux (, -)" "espace" utilisables
+  // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
+  // $ = Désigne la fin de mon expression régulière
+);
+//---------------Création de "RegExp" pour la validation d'email---------------
+let emailRegExp = new RegExp(
+  "^[a-zA-Z0-9.-_]{2,}[@]{1}[a-zA-Z0-9.-_]{2,}[.]{1}[a-z]{2,5}$"
+  //--------Premier paramètre du RegExp----------
+  // ^ = début du texte
+  // [a-zA-Z0-9.-_] = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables au début de l'email
+  // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
+  // [@] = Définie le caractère possible et {1} = le nombre de fois qu'il est possible de l'écrire.
+  // [a-zA-Z0-9.-_] = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables après "@".
+  // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
+  // [.] = Définie le caractère possible et {1} = le nombre de fois qu'il est possible de l'écrire.
+  // [a-z] = ensemble de caractères "minuscule" utilisables pour définir l'extension de l'email
+  // {2,3} = Nombre de caractère compris entre "2 ou 3" qu'il est possible d'écrire
+  // $ = Désigne la fin de mon expression régulière
+  //--------Deuxième paramètre du RegExp----------
+  // Le marqueur "g" = "global". Définie la façon de lire le RegExp
+);
 
-//----------------------------------------récupèration des données saisie----------------------------------------------------
-// Sélectionner l'élément input et récupérer sa valeur
-let firstName = document.getElementById("firstName");
-firstName.addEventListener("change", getValue);
-let lastName = document.getElementById("lastName");
-lastName.addEventListener("change", getValue);
-let address = document.getElementById("address");
-address.addEventListener("change", getValue);
-let city = document.getElementById("city");
-city.addEventListener("change", getValue);
-let email = document.getElementById("email");
-email.addEventListener("change", getValue);
-//On crée un objet "contact"
-let contact = {};
-function getValue(e) {
-  //Avec la function "getValue"
-  //On envoie les données inscrites par l'utilisateur dans les formulaire dans l'objet "contact".
-  contact = {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    address: address.value,
-    city: city.value,
-    email: email.value,
-  };
-}
-//----------------------------------------Envoie de données à l'API----------------------------------------------------
+//****************************Envoie de données à l'API****************************
 
 //On cible le bouton commander
 let commander = document.getElementById("order");
@@ -346,6 +320,67 @@ commander.addEventListener("click", postCommand);
 //On lance une function "postCommand" pour envoyer les données à l'API
 function postCommand(e) {
   e.preventDefault();
+  let contact = {};
+  //-----------------------Validation formulaire----------------------
+  //Ecoute des formulaire =>
+  let textFirstName = document.getElementById("firstName");
+  let textLastName = document.getElementById("lastName");
+  let textAddress = document.getElementById("address");
+  let textCity = document.getElementById("city");
+  let textEmail = document.getElementById("email");
+  //Récupèration des balises "NameErrorMsg"
+  let errorFirstName = document.getElementById("firstNameErrorMsg");
+  let errorLastName = document.getElementById("lastNameErrorMsg");
+  let errorAdresse = document.getElementById("addressErrorMsg");
+  let errorCity = document.getElementById("cityErrorMsg");
+  let errorEmail = document.getElementById("emailErrorMsg");
+  //Test des expressions régulières'
+  //Condition si "true" alors on ajoute un méssage de validation || si "false" on ajoute un méssage d'érreur
+  let valide = true;
+  if (textRegExp.test(textFirstName.value)) {
+    errorFirstName.innerHTML = "Formulaire valide";
+  } else {
+    errorFirstName.innerHTML = "Formulaire invalide";
+    valide = false;
+  }
+  if (textRegExp.test(textLastName.value)) {
+    errorLastName.innerHTML = "Formulaire valide";
+  } else {
+    errorLastName.innerHTML = "Formulaire invalide";
+    valide = false;
+  }
+  if (adresseRegExp.test(textAddress.value)) {
+    errorAdresse.innerHTML = "Formulaire valide";
+  } else {
+    errorAdresse.innerHTML = "Formulaire invalide";
+    valide = false;
+  }
+  if (textRegExp.test(textCity.value)) {
+    errorCity.innerHTML = "Formulaire valide";
+  } else {
+    errorCity.innerHTML = "Formulaire invalide";
+    valide = false;
+  }
+  if (emailRegExp.test(textEmail.value)) {
+    errorEmail.innerHTML = "Adresse email valide";
+  } else {
+    errorEmail.innerHTML = "Adresse email invalide";
+    valide = false;
+  }
+  if (valide != true) {
+    alert(`Il y a une érreur au niveau de votre saisie`);
+    return false;
+  }
+  //****************************récupèration des données saisie****************************
+  contact = {
+    firstName: textFirstName.value,
+    lastName: textLastName.value,
+    address: textAddress.value,
+    city: textCity.value,
+    email: textEmail.value,
+  };
+  console.log(contact);
+
   //On crée un tableau "product"
   let products = [];
   //On récupère les "ID" des produits du panier.
@@ -353,6 +388,7 @@ function postCommand(e) {
     let id = produits.id;
     products.push(id);
   }
+  console.log(products);
   // Requette fetch pour utiliser la méthode POST, envoyer les données utilisateurs, récupérer le bon de commande et envoyer l'utilisateur sur la page confirmation.
   fetch("http://localhost:3000/api/products/order", {
     method: "POST",
@@ -371,11 +407,12 @@ function postCommand(e) {
       }
     })
     .then(function (reponse) {
+      console.log(reponse);
       const orderId = reponse.orderId;
       console.log(orderId);
       location.href = `./confirmation.html?commande=${orderId}`;
     })
     .catch(function (erreur) {
-      // Une erreur est survenue
+      alert("Une erreur est survenue" + erreur);
     });
 }

@@ -22,5 +22,5 @@ fetch("http://localhost:3000/api/products")
     }
   })
   .catch(function (erreur) {
-    // Une erreur est survenue
+    alert("Une erreur est survenue" + erreur);
   });

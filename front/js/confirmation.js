@@ -8,3 +8,5 @@ console.table(articleLocalStorage);
 //On insert dans le DOM a la partie "orderId", la variable "numCommande" qui contient le numéro de commande.
 let numeroCommand = document.getElementById("orderId");
 numeroCommand.innerHTML = numCommande;
+
+// localStorage.clear();
