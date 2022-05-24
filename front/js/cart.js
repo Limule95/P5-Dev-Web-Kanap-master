@@ -200,6 +200,7 @@ function deleteItem(e) {
       localStorage.setItem("article", JSON.stringify(articleLocalStorage));
       //On supprimer l'article du DOM avec "remove"
       article.remove();
+      Location.reload();
     }
   }
 }
