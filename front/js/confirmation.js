@@ -9,4 +9,4 @@ console.table(articleLocalStorage);
 let numeroCommand = document.getElementById("orderId");
 numeroCommand.innerHTML = numCommande;
 
-// localStorage.clear();
+localStorage.clear();

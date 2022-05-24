@@ -7,25 +7,24 @@ let totalProductsPrice = 0;
 let totalProductsArticle = 0;
 
 //****************************Au chargement de la page****************************
-for (let produit of articleLocalStorage) {
-  //On récupère l'ID
-  const id = produit.id;
-  //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
-  fetch(`http://localhost:3000/api/products/${id}`)
-    .then(function (reponse) {
-      if (reponse.ok) {
-        return reponse.json();
-      }
-    })
-    .then(function (getCart) {
-      // Si le localStorage est vide
-      if (articleLocalStorage === null) {
-        let artNull = document.createElement("p");
-        //On signale a l'utilisateur que le panier est vide
-        artNull.innerHTML = "Votre panier est vide";
-        // on vise le conteneur et on ajoute le nœud  a la nouvelle div créé
-        document.querySelector("#cart__items").appendChild(artNull);
-      } else {
+if (articleLocalStorage === null) {
+  let artNull = document.createElement("p");
+  //On signale a l'utilisateur que le panier est vide
+  artNull.innerHTML = "Votre panier est vide";
+  // on vise le conteneur et on ajoute le nœud  a la nouvelle div créé
+  document.querySelector("#cart__items").appendChild(artNull);
+} else {
+  for (let produit of articleLocalStorage) {
+    //On récupère l'ID
+    const id = produit.id;
+    //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
+    fetch(`http://localhost:3000/api/products/${id}`)
+      .then(function (reponse) {
+        if (reponse.ok) {
+          return reponse.json();
+        }
+      })
+      .then(function (getCart) {
         //Si le localStorage contient des données
         // Insertion d'un article
         let cartItem = document.createElement("article");
@@ -148,26 +147,25 @@ for (let produit of articleLocalStorage) {
         deleteCartitem.innerHTML = "Supprimer";
         // On insert un addEventLister au "click" sur le bouton supprimer
         deleteCartitem.addEventListener("click", deleteItem);
-      }
-    })
-    .then(function () {
-      //On appelle une deuxième function qui sera utiliser une fois que la première promise est fini d'être lu.
+      })
+      .then(function () {
+        //On appelle une deuxième function qui sera utiliser une fois que la première promise est fini d'être lu.
 
-      //On déclarer une variable qui va ciblé l'ID "totalPrice" auquel on va insérer le prix total.
-      let productTotalPrice = document.getElementById("totalPrice");
-      productTotalPrice.innerHTML = totalProductsPrice;
+        //On déclarer une variable qui va ciblé l'ID "totalPrice" auquel on va insérer le prix total.
+        let productTotalPrice = document.getElementById("totalPrice");
+        productTotalPrice.innerHTML = totalProductsPrice;
 
-      //On déclarer une variable qui va ciblé l'ID "totalQuantity" auquel on va insérer la quatité total d'article.
-      let productTotalQuantity = document.getElementById("totalQuantity");
-      productTotalQuantity.innerHTML = totalProductsArticle;
-    })
-    .catch(function (erreur) {
-      alert("Une erreur est survenue" + erreur);
-    });
+        //On déclarer une variable qui va ciblé l'ID "totalQuantity" auquel on va insérer la quatité total d'article.
+        let productTotalQuantity = document.getElementById("totalQuantity");
+        productTotalQuantity.innerHTML = totalProductsArticle;
+      })
+      .catch(function (erreur) {
+        alert("Une erreur est survenue" + erreur);
+      });
+  }
 }
 
 //****************************Fonction = suppréssion d'article****************************
-
 //Après le chargement de la page :
 //On déclare la function "deleteItem" pour pouvoir supprimer un article du DOM et du localStorage
 function deleteItem(e) {
@@ -175,66 +173,42 @@ function deleteItem(e) {
   let boutonSuprimer = e.target;
   // On crée une variable "article" à la quelle on lui donne comme valeur la variable "boutonSupprimer" à qui on va lui attribuer un closet qui va ciblé le parent ".cart__Item" de l'enfant target.
   let article = boutonSuprimer.closest(".cart__item");
-  //Avec article.dataset."", on récupère le data-Id et le data-Color de l'élèment ciblé
-  article.dataset.id === "";
-  article.dataset.color === "";
 
-  // On boucle de localStorage pour récupèrer l'ID et la couleur pour faire une comparaison.
-  for (let produit of articleLocalStorage) {
-    if (
-      //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'article dans le Dom
-      produit.id === article.dataset.id &&
-      produit.color === article.dataset.color
-    ) {
-      // j'ai fais de cette façon pour récupérer le prix apprès la suppréssion par facilité, mais on pourrait aussi faire un fetch.
-      // changePrice = document.querySelector("article .price").textContent;
-      // let productTotalPrice = document.getElementById("totalPrice");
-
-      totalProductsArticle = totalProductsArticle - produit.nombre;
-      // On déclare une varible index à laquelle on lui donne comme valeur le localStorage avec un "indexOf" qui renvoie le premier indice.
-      //Sachant que l'on boucle le localStorage, l'indexOf va chercher l'indice en fonction de l'id et la couleur de l'élèment qu'on cible,
-
-      // Avec la méthode "splice", on va modifie le contenu du tableau en retirant l'élément choisie.
-      articleLocalStorage.splice(boutonSuprimer.index, 1);
-      //avec "localStorage.setItem", on met a jour le localStorage
-      localStorage.setItem("article", JSON.stringify(articleLocalStorage));
-      //On supprimer l'article du DOM avec "remove"
-      article.remove();
-      Location.reload();
-    }
-  }
+  updateAll(article, "delete", 0);
 }
 
 //****************************Fonction = Changement de quantité d'article et modification des prix*********************************
-
 //On déclare la function "updatePrice" pour pouvoir modifier le nombre d'article et leurs prix, ainsi que le prix total de tous les articles.
 function updatePrice(e) {
   // On crée une variable "updateButtun" au quel on lui donne comme valeur un "event target" qui va ciblé l'élèment du DOM ou la function est appellé.
   let updateButtun = e.target;
   // On crée une variable "update" à la quelle on lui donne comme valeur la variable "updateButtun" à qui on va lui attribuer un closet qui va ciblé le parent ".cart__Item" de l'enfant target.
   let update = updateButtun.closest(".cart__item");
-  //Avec update.dataset."", on récupère le data-Id et le data-Color de l'élèment ciblé
-  update.dataset.id === "";
-  update.dataset.color === "";
-  //Avec update.value, on recupère la valeur que l'on viens de modifier avec l'event "target" qui cible la valeur qui change.
-  update.value = e.target.value;
+
+  updateAll(update, "update", e.target.value);
+}
+
+function updateAll(element, type, value) {
+  //Avec article.dataset."", on récupère le data-Id et le data-Color de l'élèment ciblé
+  element.dataset.id === "";
+  element.dataset.color === "";
 
   //On initialise une variable "TotalNombre" qui est à 0.
   let totalNombre = 0;
 
   // On boucle de localStorage pour récupèrer l'ID et la couleur pour faire une comparaison.
-  for (let produit of articleLocalStorage) {
+  for (let [i, produit] of articleLocalStorage.entries()) {
     //On récupère l'ID
     const id = produit.id;
     if (
       //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'élèment du DOM qu'on modifie.
-      produit.id === update.dataset.id &&
-      produit.color === update.dataset.color
+      produit.id === element.dataset.id &&
+      produit.color === element.dataset.color
     ) {
       //On stock l'encien prix
-      let oldPrice = update.querySelector(".price").textContent;
+      let oldPrice = element.querySelector(".price").textContent;
       //Avec "produit.nombre" on va récupèrer la valeur de "update.value" qui avec la fonction "parseInt", analyse la chaîne de caractère fournie en argument et renvoie un entier.
-      produit.nombre = parseInt(update.value);
+      produit.nombre = parseInt(value);
       //On récupère "totalProductsArticle" au quel on lui attribut la quantité modifier de article avec "produit.nombre"
       totalProductsArticle = produit.nombre;
       //avec "localStorage.setItem", on met a jour le localStorage
@@ -251,7 +225,7 @@ function updatePrice(e) {
           //On crée une variable "getPriceTotal"  a laquelle on lui attribut le prix de article x la quantité d'article qu'on à modifier
           let getPriceTotal = getArticle.price * totalProductsArticle;
           //On crée une variable "PriceTotal" ou l'on va selectionner ".price"
-          let PriceTotal = update.querySelector(".price");
+          let PriceTotal = element.querySelector(".price");
           //On insert la valeur de "getPriceTotal" dans le DOM
           PriceTotal.innerHTML = getPriceTotal;
 
@@ -272,6 +246,27 @@ function updatePrice(e) {
   //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré dans la variable "totalNombre".
   let totalQuantity = document.getElementById("totalQuantity");
   totalQuantity.innerHTML = totalNombre;
+
+  if (type === "delete") {
+    for (let [i, produit] of articleLocalStorage.entries()) {
+      console.log(i);
+      if (
+        //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'article dans le Dom
+        produit.id === element.dataset.id &&
+        produit.color === element.dataset.color
+      ) {
+        console.log(produit);
+        // totalProductsArticle = totalProductsArticle - produit.nombre;
+
+        // Avec la méthode "splice", on va modifie le contenu du tableau en retirant l'élément choisie.
+        articleLocalStorage.splice(i, 1);
+        //avec "localStorage.setItem", on met a jour le localStorage
+        localStorage.setItem("article", JSON.stringify(articleLocalStorage));
+        //On supprimer l'article du DOM avec "remove"
+        element.remove();
+      }
+    }
+  }
 }
 
 //****************************Validation des données saisie****************************
