@@ -273,9 +273,10 @@ function updateAll(element, type, value) {
   //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré dans la variable "totalNombre".
   let totalQuantity = document.getElementById("totalQuantity");
   totalQuantity.innerHTML = totalNombre;
+  console.log(parseInt(value) === 0);
 
   //Si le paramêtre "type" de updateAll() est la même que deleteItem()
-  if (type === "delete") {
+  if (type === "delete" || (type === "update" && parseInt(value) === 0)) {
     //On parcoure le "array" de Storage
     for (let [i, produit] of articleLocalStorage.entries()) {
       console.log(i);
@@ -292,6 +293,14 @@ function updateAll(element, type, value) {
         //On supprimer l'article du DOM avec "remove"
         element.remove();
       }
+    }
+    // verifier le localstorage  ==> si vide, appeller la function arrayEmpty()
+    if (
+      Array.isArray(articleLocalStorage) &&
+      articleLocalStorage.length === 0
+    ) {
+      //Appelle de la function arrayEmpty()
+      arrayEmpty();
     }
   }
 }
