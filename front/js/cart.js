@@ -1,23 +1,34 @@
-//Initialisation du local storage qu'on récupère dans la console sous forme de tableau avec " console.table "
+//********************************* Au chargement de la page "PANIER" *********************************
+
+//********************************* Initialisation de variable *********************************
+//Récupèration du localStorage ("articleLocalStorage")
 let articleLocalStorage = JSON.parse(localStorage.getItem("article"));
 console.table(articleLocalStorage);
-//Initialisation de la variables " totalProductsPrice" qu'on viendra réutiliser pour afficher le prix total de tous les articles.
+
+//Variables "totalProductsPrice" qu'on viendra réutiliser pour afficher le prix total de tous les articles.
 let totalProductsPrice = 0;
-//Initialisation de la variables "totalProductsArticle" qu'on viendra réutiliser pour afficher le la quantité pour chaque article.
+
+//Variables "totalProductsArticle" qu'on viendra réutiliser pour afficher la quantité pour chaque article.
 let totalProductsArticle = 0;
 
-//****************************Au chargement de la page****************************
+//********************************* Incorporation "dynamique" des articles dans la page "PANIER" *********************************
+// Si ("articleLocalStorage") est "vide" ==>
 if (articleLocalStorage === null) {
-  let artNull = document.createElement("p");
-  //On signale a l'utilisateur que le panier est vide
-  artNull.innerHTML = "Votre panier est vide";
-  // on vise le conteneur et on ajoute le nœud  a la nouvelle div créé
-  document.querySelector("#cart__items").appendChild(artNull);
-} else {
+  //Appelle de la function arrayEmpty()
+  arrayEmpty();
+}
+//Si on a déja un ("articleLocalStorage") qui est bien un array et qu'il est "vide" ==>
+if (Array.isArray(articleLocalStorage) && articleLocalStorage.length === 0) {
+  //Appelle de la function arrayEmpty()
+  arrayEmpty();
+}
+//Sinon, si ("articleLocalStorage") contient des articles
+else {
+  // On parcour le localStorage ("articleLocalStorage")
   for (let produit of articleLocalStorage) {
     //On récupère l'ID
     const id = produit.id;
-    //On fait une requette fetch à l'API en fonction des ID qu'on a récupèrer dans notre localStorage pour récupèrer des données de chaques articles en fonction de leurs ID.
+    //On requette l'API avec "fetch" en fonction des "ID" qu'on a récupèré dans notre localStorage("articleLocalStorage") pour récupèrer certainent données de chaque article
     fetch(`http://localhost:3000/api/products/${id}`)
       .then(function (reponse) {
         if (reponse.ok) {
@@ -25,7 +36,6 @@ if (articleLocalStorage === null) {
         }
       })
       .then(function (getCart) {
-        //Si le localStorage contient des données
         // Insertion d'un article
         let cartItem = document.createElement("article");
         //On rajoute une class
@@ -160,55 +170,69 @@ if (articleLocalStorage === null) {
         productTotalQuantity.innerHTML = totalProductsArticle;
       })
       .catch(function (erreur) {
+        //Renvoie une réponse "(erreur)"
         alert("Une erreur est survenue" + erreur);
       });
   }
 }
 
-//****************************Fonction = suppréssion d'article****************************
-//Après le chargement de la page :
-//On déclare la function "deleteItem" pour pouvoir supprimer un article du DOM et du localStorage
+//********************************* Fonction deleteItem(e) = suppréssion d'article *********************************
+
+//On déclare la function deleteItem(e) pour pouvoir supprimer un article du DOM et du localStorage
 function deleteItem(e) {
   // On crée une variable "boutonSupprimer" au quel on lui donne comme valeur un "event target" qui va ciblé l'élèment du DOM ou la function est appellé.
   let boutonSuprimer = e.target;
   // On crée une variable "article" à la quelle on lui donne comme valeur la variable "boutonSupprimer" à qui on va lui attribuer un closet qui va ciblé le parent ".cart__Item" de l'enfant target.
   let article = boutonSuprimer.closest(".cart__item");
 
+  //On appelle la function updateAll() avec comme paramêtre "article" qui est le parent (".cart__item") que l'on veut supprimer
   updateAll(article, "delete", 0);
+
+  //Si ("articleLocalStorage") est bien un array et qu'il est "vide" après la suppréssion des articles ==>
+  if (Array.isArray(articleLocalStorage) && articleLocalStorage.length === 0) {
+    //Appelle de la function arrayEmpty()
+    arrayEmpty();
+  }
 }
 
-//****************************Fonction = Changement de quantité d'article et modification des prix*********************************
-//On déclare la function "updatePrice" pour pouvoir modifier le nombre d'article et leurs prix, ainsi que le prix total de tous les articles.
+//********************************* Fonction updatePrice(e) = Changement de quantité d'article et modification des prix *********************************
+
+//On déclare la function updatePrice(e) pour pouvoir modifier le nombre d'article et leurs prix, ainsi que le nombre et prix total de tous les articles.
 function updatePrice(e) {
   // On crée une variable "updateButtun" au quel on lui donne comme valeur un "event target" qui va ciblé l'élèment du DOM ou la function est appellé.
   let updateButtun = e.target;
   // On crée une variable "update" à la quelle on lui donne comme valeur la variable "updateButtun" à qui on va lui attribuer un closet qui va ciblé le parent ".cart__Item" de l'enfant target.
   let update = updateButtun.closest(".cart__item");
 
+  //On appelle la function updateAll() avec comme paramêtre "update" qui est le parent (".cart__item") que l'on veut modifier
   updateAll(update, "update", e.target.value);
 }
+
+//********************************* Function "USINE" updateAll(element, type, value) *********************************
+//********************************* MAJ "prix/quantité" regroupant tous les paramêtres de modification des quantités et de suppréssion d'article *********************************
 
 function updateAll(element, type, value) {
   //Avec article.dataset."", on récupère le data-Id et le data-Color de l'élèment ciblé
   element.dataset.id === "";
   element.dataset.color === "";
 
-  //On initialise une variable "TotalNombre" qui est à 0.
+  //On crée une variable "TotalNombre" qui est à "0".
   let totalNombre = 0;
 
-  // On boucle de localStorage pour récupèrer l'ID et la couleur pour faire une comparaison.
+  // On parcour le localStorage ("articleLocalStorage")
   for (let [i, produit] of articleLocalStorage.entries()) {
     //On récupère l'ID
     const id = produit.id;
     if (
-      //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'élèment du DOM qu'on modifie.
+      //On cible l'article sélectionné via à correspondance de l'id et la couleur
       produit.id === element.dataset.id &&
       produit.color === element.dataset.color
     ) {
       //On stock l'encien prix
       let oldPrice = element.querySelector(".price").textContent;
-      //Avec "produit.nombre" on va récupèrer la valeur de "update.value" qui avec la fonction "parseInt", analyse la chaîne de caractère fournie en argument et renvoie un entier.
-      produit.nombre = parseInt(value);
+
+      //On remplace la quantité article par la nouvelle
+      produit.nombre = parseInt(value); //On transforme la valeur de la quantité de string à number grace à parsInt
       //On récupère "totalProductsArticle" au quel on lui attribut la quantité modifier de article avec "produit.nombre"
       totalProductsArticle = produit.nombre;
       //avec "localStorage.setItem", on met a jour le localStorage
@@ -222,42 +246,45 @@ function updateAll(element, type, value) {
           }
         })
         .then(function (getArticle) {
-          //On crée une variable "getPriceTotal"  a laquelle on lui attribut le prix de article x la quantité d'article qu'on à modifier
+          //On récupère la réponse de l'API
+          //Recalcule du prix en fonction de la nouvelle quantité
           let getPriceTotal = getArticle.price * totalProductsArticle;
-          //On crée une variable "PriceTotal" ou l'on va selectionner ".price"
           let PriceTotal = element.querySelector(".price");
-          //On insert la valeur de "getPriceTotal" dans le DOM
+          //On injecte le nouveau prix en html
           PriceTotal.innerHTML = getPriceTotal;
 
           //on calcule la différence entre le nouveau prix et l'encien prix ex : 10k - 5k Si le resultat est positif, on rajoute 5k sinon ( 5k - 10k = -5 )on ajoute -5k ( qui est équivalant a retirer 5k)
-          let difference = getPriceTotal - parseInt(oldPrice);
-          totalProductsPrice = totalProductsPrice + difference;
+          let difference = getPriceTotal - parseInt(oldPrice); //On transforme la valeur de la quantité de string à number grace à parsInt
+          //Calcule du total en fonction de la différence entre le total et l'encien prix
+          totalProductsPrice = totalProductsPrice + difference; //Prix du total d'article + la différence
+
           //On insert dans le DOM à "totalPrice" la différence de prix que l'on a récupèré dans la variable "totalProductsPrice".
           let productTotalPrice = document.getElementById("totalPrice");
           productTotalPrice.innerHTML = totalProductsPrice;
         })
         .catch(function (erreur) {
+          //Renvoie une réponse "(erreur)"
           alert("Une erreur est survenue" + erreur);
         });
     }
-    //On ajoute à "totalNombre" le nombre de d'article que l'utilisateur ajoute ou modifie.
+    //totalNombre prend la valeur de la quantité d'article
     totalNombre = totalNombre + produit.nombre;
   }
   //On insert dans le DOM à "totalQuantity" le nombre d'article total que l'on a récupèré dans la variable "totalNombre".
   let totalQuantity = document.getElementById("totalQuantity");
   totalQuantity.innerHTML = totalNombre;
 
+  //Si le paramêtre "type" de updateAll() est la même que deleteItem()
   if (type === "delete") {
+    //On parcoure le "array" de Storage
     for (let [i, produit] of articleLocalStorage.entries()) {
       console.log(i);
+
       if (
         //Si l'id et la couleur d'un produit dans le localStorage est égale au data-id et data-color de l'article dans le Dom
         produit.id === element.dataset.id &&
         produit.color === element.dataset.color
       ) {
-        console.log(produit);
-        // totalProductsArticle = totalProductsArticle - produit.nombre;
-
         // Avec la méthode "splice", on va modifie le contenu du tableau en retirant l'élément choisie.
         articleLocalStorage.splice(i, 1);
         //avec "localStorage.setItem", on met a jour le localStorage
@@ -268,13 +295,28 @@ function updateAll(element, type, value) {
     }
   }
 }
+//On crée une function qui affichera dans le corp html "Votre panier est vide" si il ne trouve aucun article dans "articleLocalStorage"
+function arrayEmpty() {
+  //On crée une balise html "p"
+  let artNull = document.createElement("p");
+  //On signale a l'utilisateur que le panier est vide
+  artNull.innerHTML = "Votre panier est vide";
+  // on vise le conteneur et on ajoute la balise crée
+  document.querySelector("#cart__items").appendChild(artNull);
+
+  //On indique que le total d'article et le prix total est a "0"
+  let totalArticle = document.getElementById("totalQuantity");
+  totalArticle.innerHTML = " 0 ";
+  let totalPrice = document.getElementById("totalPrice");
+  totalPrice.innerHTML = `<span class="price"> 0 </span>`;
+}
 
 //****************************Validation des données saisie****************************
 //---------------Création des expressions régulières "Regexp"---------------
 //---------------Création de "RegExp" pour la validation de FirstName et LastName---------------
 let textRegExp = new RegExp(
   "^[a-zA-Z -,]{2,}$"
-  //--------Premier paramètre du RegExp----------
+  //--------Paramètre du RegExp----------
   // ^ = début du texte
   // [a-zA-Z -,] = ensemble de caractères "minuscule" "MAJUSCULE" "caractère spéciaux "espace" (, -)"  utilisables
   // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
@@ -283,7 +325,7 @@ let textRegExp = new RegExp(
 //---------------Création de "RegExp" pour la validation d'adresse---------------
 let adresseRegExp = new RegExp(
   "^[a-zA-Z0-9 -,]{2,}$"
-  //--------Premier paramètre du RegExp----------
+  //--------Paramètre du RegExp----------
   // ^ = début du texte
   // [a-zA-Z0-9 -,] = ensemble de caractères "minuscule" "MAJUSCULE" "caractère spéciaux (, -)" "espace" utilisables
   // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
@@ -292,7 +334,7 @@ let adresseRegExp = new RegExp(
 //---------------Création de "RegExp" pour la validation d'email---------------
 let emailRegExp = new RegExp(
   "^[a-zA-Z0-9.-_]{2,}[@]{1}[a-zA-Z0-9.-_]{2,}[.]{1}[a-z]{2,5}$"
-  //--------Premier paramètre du RegExp----------
+  //--------Paramètre du RegExp----------
   // ^ = début du texte
   // [a-zA-Z0-9.-_] = ensemble de caractères "minuscule" "MAJUSCULE" "Chifre" "Caractère spéciaux" utilisables au début de l'email
   // {2,} = Nombre de caractère compris entre "2 ou plus qu'il est possible d'écrire
@@ -303,11 +345,9 @@ let emailRegExp = new RegExp(
   // [a-z] = ensemble de caractères "minuscule" utilisables pour définir l'extension de l'email
   // {2,3} = Nombre de caractère compris entre "2 ou 3" qu'il est possible d'écrire
   // $ = Désigne la fin de mon expression régulière
-  //--------Deuxième paramètre du RegExp----------
-  // Le marqueur "g" = "global". Définie la façon de lire le RegExp
 );
 
-//****************************Envoie de données à l'API****************************
+//********************************* Validation, Récupèration et Envoie de données à l'API *********************************
 
 //On cible le bouton commander
 let commander = document.getElementById("order");
@@ -317,48 +357,57 @@ commander.addEventListener("click", postCommand);
 function postCommand(e) {
   e.preventDefault();
   let contact = {};
-  //-----------------------Validation formulaire----------------------
-  //Ecoute des formulaire =>
+
+  //********************************* Validation formulaire *********************************
+  //Ecoute des formulaire => On sélectionne les balises de chaque champ a remplir.
   let textFirstName = document.getElementById("firstName");
   let textLastName = document.getElementById("lastName");
   let textAddress = document.getElementById("address");
   let textCity = document.getElementById("city");
   let textEmail = document.getElementById("email");
+
   //Récupèration des balises "NameErrorMsg"
   let errorFirstName = document.getElementById("firstNameErrorMsg");
   let errorLastName = document.getElementById("lastNameErrorMsg");
   let errorAdresse = document.getElementById("addressErrorMsg");
   let errorCity = document.getElementById("cityErrorMsg");
   let errorEmail = document.getElementById("emailErrorMsg");
+
   //Test des expressions régulières'
-  //Condition si "true" alors on ajoute un méssage de validation || si "false" on ajoute un méssage d'érreur
+  //Condition si les information rentrés par l'utilisateur dans le formulaire sont validés par les "RegExp" alors on ajoute un méssage de validation
+  //Sinon on ajoute un méssage d'érreur.
   let valide = true;
   if (textRegExp.test(textFirstName.value)) {
     errorFirstName.innerHTML = "Formulaire valide";
+    errorFirstName.setAttribute("style", "color:#11D01F");
   } else {
     errorFirstName.innerHTML = "Formulaire invalide";
     valide = false;
   }
   if (textRegExp.test(textLastName.value)) {
     errorLastName.innerHTML = "Formulaire valide";
+    errorLastName.setAttribute("style", "color:#11D01F");
   } else {
     errorLastName.innerHTML = "Formulaire invalide";
     valide = false;
   }
   if (adresseRegExp.test(textAddress.value)) {
     errorAdresse.innerHTML = "Formulaire valide";
+    errorAdresse.setAttribute("style", "color:#11D01F");
   } else {
     errorAdresse.innerHTML = "Formulaire invalide";
     valide = false;
   }
   if (textRegExp.test(textCity.value)) {
     errorCity.innerHTML = "Formulaire valide";
+    errorCity.setAttribute("style", "color:#11D01F");
   } else {
     errorCity.innerHTML = "Formulaire invalide";
     valide = false;
   }
   if (emailRegExp.test(textEmail.value)) {
     errorEmail.innerHTML = "Adresse email valide";
+    errorEmail.setAttribute("style", "color:#11D01F");
   } else {
     errorEmail.innerHTML = "Adresse email invalide";
     valide = false;
@@ -367,7 +416,7 @@ function postCommand(e) {
     alert(`Il y a une érreur au niveau de votre saisie`);
     return false;
   }
-  //****************************récupèration des données saisie****************************
+  //********************************* Récupèration des informations saisies *********************************
   contact = {
     firstName: textFirstName.value,
     lastName: textLastName.value,
@@ -377,18 +426,25 @@ function postCommand(e) {
   };
   console.log(contact);
 
-  //On crée un tableau "product"
+  //********************************* récupèration des "ID" d'article *********************************
+  //On crée un tableau "product" vide
   let products = [];
-  //On récupère les "ID" des produits du panier.
+  // On parcour le localStorage ("articleLocalStorage")
   for (let produits of articleLocalStorage) {
+    //On récupère les "ID" de chaque article.
     let id = produits.id;
+    //On "push" le/les "ID" dans le tableau "products"
     products.push(id);
   }
-  console.log(products);
-  // Requette fetch pour utiliser la méthode POST, envoyer les données utilisateurs, récupérer le bon de commande et envoyer l'utilisateur sur la page confirmation.
+
+  //********************************* Envoie des données à l'API *********************************
+  //On requette l'API avec "fetch" en utilisant la méthode POST. et envoyer l'utilisateur sur la page confirmation.
   fetch("http://localhost:3000/api/products/order", {
     method: "POST",
+    //Envoye l'objet "contact" qui contient les informations de utilisateur, saisie dans le formulaire.
+    // Envoie le tableau "product" qui contient les "ID" des articles.
     body: JSON.stringify({
+      //JSON.stringify qui converti les valeurs JavaScript en chaîne JSON.
       contact,
       products,
     }),
@@ -403,9 +459,9 @@ function postCommand(e) {
       }
     })
     .then(function (reponse) {
-      console.log(reponse);
+      //Récupèration du bon de commande
       const orderId = reponse.orderId;
-      console.log(orderId);
+      //On envoye l'utilisateur sur la page confirmation et on ajoute dans l'URL un paramêtre (?commande=) qui contient le bon de commande "orderId".
       location.href = `./confirmation.html?commande=${orderId}`;
     })
     .catch(function (erreur) {

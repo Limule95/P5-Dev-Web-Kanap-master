@@ -1,12 +1,14 @@
-//On récupère le numéro de commande inclut dans l'URL pour le stocké dans la variable "numCommande"
+//********************************* Confirmation de la commande *********************************
+//********************************* Récupèration du bon de commande *********************************
+//On récupère le numéro de commande inclut dans l'URL.
 let numCommande = new URLSearchParams(document.location.search).get("commande");
 
-//Initialisation du local storage
-let articleLocalStorage = JSON.parse(localStorage.getItem("article"));
-console.table(articleLocalStorage);
-
-//On insert dans le DOM a la partie "orderId", la variable "numCommande" qui contient le numéro de commande.
+//********************************* Incorporation "dynamique" du bon de commande dans la page "CONFIRMATION" *********************************
+//On sélectionne la balise ("orderId").
 let numeroCommand = document.getElementById("orderId");
+//On insert le numéro de commande.
 numeroCommand.innerHTML = numCommande;
 
+//********************************* Supréssion des articles du localStorage *********************************
+//On vide le localStorage ("articleLocalStorage").
 localStorage.clear();
