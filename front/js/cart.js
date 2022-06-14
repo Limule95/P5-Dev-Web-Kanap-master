@@ -426,6 +426,7 @@ function postCommand(e) {
     return false;
   }
   //********************************* Récupèration des informations saisies *********************************
+  //On crée un objet "Contact" ou l'on va enregistrer les doonées saisies par l'utilisateur.
   contact = {
     firstName: textFirstName.value,
     lastName: textLastName.value,
@@ -474,6 +475,7 @@ function postCommand(e) {
       location.href = `./confirmation.html?commande=${orderId}`;
     })
     .catch(function (erreur) {
+      //Renvoie une réponse "(erreur)".
       alert("Une erreur est survenue" + erreur);
     });
 }

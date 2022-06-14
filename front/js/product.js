@@ -2,6 +2,7 @@
 const url = new URL(window.location.href);
 
 //Récupèration de l'ID dans les paramêtre de l'URL.
+// " url.searchParams.get " Retourne la première valeur associée au paramètre de recherche donné.
 const id = url.searchParams.get("id");
 
 //********************************* Incorporation "dynamique" de l'article dans la page "PRODUIT" *********************************
